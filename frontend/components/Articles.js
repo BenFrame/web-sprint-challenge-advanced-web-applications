@@ -1,16 +1,44 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Navigate } from 'react-router-dom'
 import PT from 'prop-types'
+import axios from 'axios'
+import {axiosWithAuth} from '../axios'
 
 export default function Articles(props) {
+  const { articles, setArticles, values, setValues, editing, setEditing } = props;
   // ✨ where are my props? Destructure them here
 
   // ✨ implement conditional logic: if no token exists
   // we should render a Navigate to login screen (React Router v.6)
 
   useEffect(() => {
+    const token = localStorage.getItem('token'); 
+    axios.get('http://localhost:9000/api/articles',{
+      headers:{
+        authorization: token
+      }
+    })
+    .then(res => {
+      console.log(res)
+      setArticles(res.data.articles)
+      props.setMessage(res.data.message)
+    })
     // ✨ grab the articles here, on first render only
-  })
+  },[])
+
+  const onDelete = ( articleId ) =>{
+    const token = localStorage.getItem('token'); 
+    axios.delete(`http://localhost:9000/api/articles/${articleId}`,{
+      headers:{
+        authorization: token
+      }
+    })
+    .then(res => {
+      props.setMessage(res.data.message)
+      setArticles(articles.filter(art => art.article_id !== articleId ))
+    })
+  }
+  
 
   return (
     // ✨ fix the JSX: replace `Function.prototype` with actual functions
@@ -18,9 +46,10 @@ export default function Articles(props) {
     <div className="articles">
       <h2>Articles</h2>
       {
-        ![].length
+        !articles.length
           ? 'No articles yet'
-          : [].map(art => {
+          : articles.map(art => {
+            console.log( art );
             return (
               <div className="article" key={art.article_id}>
                 <div>
@@ -29,8 +58,8 @@ export default function Articles(props) {
                   <p>Topic: {art.topic}</p>
                 </div>
                 <div>
-                  <button disabled={true} onClick={Function.prototype}>Edit</button>
-                  <button disabled={true} onClick={Function.prototype}>Delete</button>
+                  <button disabled={false} onClick={ () => setValues( { title: art.title, text: art.text, topic: art.topic } )}>Edit</button>
+                  <button disabled={false} onClick={ () => onDelete(art.article_id) }>Delete</button>
                 </div>
               </div>
             )

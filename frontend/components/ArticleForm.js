@@ -1,10 +1,15 @@
 import React, { useEffect, useState } from 'react'
 import PT from 'prop-types'
+import axios from 'axios'
+import { useNavigate } from 'react-router-dom'
 
-const initialFormValues = { title: '', text: '', topic: '' }
+export const initialFormValues = { title: '', text: '', topic: '' }
 
 export default function ArticleForm(props) {
-  const [values, setValues] = useState(initialFormValues)
+  const { articles, setArticles, edititng, setEditing } = props; 
+  const {values, setValues} = props
+  const navigate = useNavigate()
+ 
   // ✨ where are my props? Destructure them here
 
   useEffect(() => {
@@ -21,12 +26,44 @@ export default function ArticleForm(props) {
 
   const onSubmit = evt => {
     evt.preventDefault()
+    const token = localStorage.getItem('token');
+    axios.post('http://localhost:9000/api/articles',
+      {
+        title: values.title, 
+        text: values.text,
+        topic: values.topic
+      },
+      {
+      headers:{
+        authorization: token
+      },
+      
+    },)
+    .then(res => {
+      console.log(res);
+      // localStorage.setItem('token', res.data.token)
+      setArticles( [...articles, res.data.article ])
+      props.setMessage(res.data.message)
+      setValues(initialFormValues)
+      
+      // navigate('/articles')
+    })
+    .catch(err=> {
+      console.log(err)
+    })
     // ✨ implement
     // We must submit a new post or update an existing one,
     // depending on the truthyness of the `currentArticle` prop.
   }
 
   const isDisabled = () => {
+    // const selectTopic = document.getElementById('topic')
+    // const value = selectTopic.value
+    if( values.text.trim() && values.title.trim() && values.topic ){
+      return false
+    }else{
+      return true
+    }
     // ✨ implement
     // Make sure the inputs have some values
   }
@@ -57,7 +94,7 @@ export default function ArticleForm(props) {
         <option value="Node">Node</option>
       </select>
       <div className="button-group">
-        <button disabled={isDisabled()} id="submitArticle">Submit</button>
+        <button disabled={isDisabled()} onClick={onSubmit} id="submitArticle">Submit</button>
         <button onClick={Function.prototype}>Cancel edit</button>
       </div>
     </form>

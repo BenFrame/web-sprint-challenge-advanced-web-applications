@@ -1,13 +1,17 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { NavLink, Routes, Route, useNavigate } from 'react-router-dom'
 import Articles from './Articles'
 import LoginForm from './LoginForm'
 import Message from './Message'
 import ArticleForm from './ArticleForm'
 import Spinner from './Spinner'
+import axios from 'axios'
+import PrivateRoute from './privateRoute'
+import {initialFormValues} from './ArticleForm'
 
 const articlesUrl = 'http://localhost:9000/api/articles'
 const loginUrl = 'http://localhost:9000/api/login'
+
 
 export default function App() {
   // ✨ MVP can be achieved with these states
@@ -15,6 +19,8 @@ export default function App() {
   const [articles, setArticles] = useState([])
   const [currentArticleId, setCurrentArticleId] = useState()
   const [spinnerOn, setSpinnerOn] = useState(false)
+  const [values, setValues] = useState(initialFormValues)
+  const [editing, setEditing] = useState()
 
   // ✨ Research `useNavigate` in React Router v.6
   const navigate = useNavigate()
@@ -22,6 +28,9 @@ export default function App() {
   const redirectToArticles = () => { /* ✨ implement */ }
 
   const logout = () => {
+    localStorage.removeItem('token')
+    navigate('/')
+    setMessage('Goodbye!')
     // ✨ implement
     // If a token is in local storage it should be removed,
     // and a message saying "Goodbye!" should be set in its proper state.
@@ -62,14 +71,15 @@ export default function App() {
   }
 
   const deleteArticle = article_id => {
+    
     // ✨ implement
   }
 
   return (
     // ✨ fix the JSX: `Spinner`, `Message`, `LoginForm`, `ArticleForm` and `Articles` expect props ❗
     <>
-      <Spinner />
-      <Message />
+      <Spinner spinner='spinner' />
+      <Message message={message}/>
       <button id="logout" onClick={logout}>Logout from app</button>
       <div id="wrapper" style={{ opacity: spinnerOn ? "0.25" : "1" }}> {/* <-- do not change this line */}
         <h1>Advanced Web Applications</h1>
@@ -80,10 +90,10 @@ export default function App() {
         <Routes>
           <Route path="/" element={<LoginForm />} />
           <Route path="articles" element={
-            <>
-              <ArticleForm />
-              <Articles />
-            </>
+            <PrivateRoute>
+              <ArticleForm editing={editing} setEditing={setEditing} values={values} setValues={setValues} articles={articles} setArticles={setArticles} setMessage={setMessage}/>
+              <Articles editing={editing} setEditing={setEditing} values={values} setValues={setValues} articles={articles} setArticles={setArticles} setMessage={setMessage}/>
+            </PrivateRoute>
           } />
         </Routes>
         <footer>Bloom Institute of Technology 2022</footer>
