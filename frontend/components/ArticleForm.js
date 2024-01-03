@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom'
 export const initialFormValues = { title: '', text: '', topic: '' }
 
 export default function ArticleForm(props) {
-  const { articles, setArticles, edititng, setEditing } = props; 
+  const { articles, setArticles, editing, setEditing } = props; 
   const {values, setValues} = props
   const navigate = useNavigate()
  
@@ -25,6 +25,27 @@ export default function ArticleForm(props) {
   }
 
   const onSubmit = evt => {
+    if(editing){
+      evt.preventDefault()
+      const token = localStorage.getItem('token');
+      axios.put(`http://localhost:9000/api/articles/${editing}`,
+      {
+        title: values.title, 
+        text: values.text,
+        topic: values.topic 
+      },{
+        headers:{
+          authorization: token
+        }
+      })
+      .then(res => {
+        console.log(res)
+        setArticles( [...articles.filter(art => art.article_id !== editing), res.data.article ])
+        props.setMessage(res.data.message)
+        setValues(initialFormValues)
+        setEditing(false)
+      })
+    }else{
     evt.preventDefault()
     const token = localStorage.getItem('token');
     axios.post('http://localhost:9000/api/articles',
@@ -54,7 +75,7 @@ export default function ArticleForm(props) {
     // ✨ implement
     // We must submit a new post or update an existing one,
     // depending on the truthyness of the `currentArticle` prop.
-  }
+  }}
 
   const isDisabled = () => {
     // const selectTopic = document.getElementById('topic')

@@ -49,7 +49,7 @@ export default function Articles(props) {
         !articles.length
           ? 'No articles yet'
           : articles.map(art => {
-            console.log( art );
+            // console.log( art );
             return (
               <div className="article" key={art.article_id}>
                 <div>
@@ -58,7 +58,10 @@ export default function Articles(props) {
                   <p>Topic: {art.topic}</p>
                 </div>
                 <div>
-                  <button disabled={false} onClick={ () => setValues( { title: art.title, text: art.text, topic: art.topic } )}>Edit</button>
+                  <button disabled={false} onClick={ () => {
+                    setEditing(art.article_id)
+                    setValues( { title: art.title, text: art.text, topic: art.topic } )
+                    }}>Edit</button>
                   <button disabled={false} onClick={ () => onDelete(art.article_id) }>Delete</button>
                 </div>
               </div>

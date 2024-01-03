@@ -20,7 +20,7 @@ export default function App() {
   const [currentArticleId, setCurrentArticleId] = useState()
   const [spinnerOn, setSpinnerOn] = useState(false)
   const [values, setValues] = useState(initialFormValues)
-  const [editing, setEditing] = useState()
+  const [editing, setEditing] = useState(false)
 
   // ✨ Research `useNavigate` in React Router v.6
   const navigate = useNavigate()
